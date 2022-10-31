@@ -188,6 +188,7 @@ func (f *JSONFetcher) FetchJSON(endpoint string) ([]byte, error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
+		level.Error(f.logger).Log("msg", "Failed to send request", "err", err)
 		return nil, err
 	}
 
@@ -207,14 +208,17 @@ func (f *JSONFetcher) FetchJSON(endpoint string) ([]byte, error) {
 			}
 		}
 		if !success {
+			level.Error(f.logger).Log("msg", "Not a success status code listed in config")
 			return nil, errors.New(resp.Status)
 		}
 	} else if resp.StatusCode/100 != 2 {
+		level.Error(f.logger).Log("msg", "Expected 200 but was "+string(resp.Status))
 		return nil, errors.New(resp.Status)
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		level.Error(f.logger).Log("msg", "Failed to read body", "err", err)
 		return nil, err
 	}
 
